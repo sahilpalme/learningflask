@@ -14,7 +14,11 @@
         {% endif %}
     {% endwith %}
 
-    <h2>You are successfully logged in </h2>
+    <h2>Welcome: {{ current_user.username }} </h2>
+    <p>Email : {{ current_user.email }}</p>
+    <a href="{{ url_for('logout') }}" class="btn">
+    logout
+</a>
     
 </body>
 </html>

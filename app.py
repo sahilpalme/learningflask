@@ -18,14 +18,16 @@ login_manager.init_app(app)
 login_manager.login_view = "login"
 
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
-class User(db.Model, UserMixin): # table in database
+
+class User(UserMixin ,db.Model ): # table in database
     id = db.Column(db.Integer, primary_key= True)
     username= db.Column(db.String(100), unique=True, nullable = False)
     email= db.Column(db.String(100),unique=True, nullable = False)
     password = db.Column(db.String(100), nullable = False)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 with app.app_context():
         db.create_all()
@@ -60,7 +62,7 @@ def login():
         user = User.query.filter_by(username= username).first()
         if user:
             if check_password_hash(user.password,password):
-                session["username"]= username
+                login_user(user) # data check krke user ko session me daal deta hai
                 return redirect(url_for("success"))
             else:
                 flash("Incorrect password") 
@@ -69,12 +71,17 @@ def login():
     return render_template("login.html", form = form)
 
 @app.route("/success")
+@login_required
 def success():
-    if "username" in session:
-        flash("Login successful!")
-        return render_template("success.html")
-    else:
-        return redirect(url_for("login"))
+    return render_template("success.html") # current_user.username shows the username of the user in session
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    flash("You have been logged out.", "success")
+    return redirect(url_for("login"))
+
 
 
 if __name__ == "__main__":
