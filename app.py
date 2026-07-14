@@ -10,13 +10,18 @@ app= Flask(__name__)
 app.secret_key= "my-secret-key"
 
 
+
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///users.db"  # database path
 db = SQLAlchemy(app) # object that will connect sql with flask
 login_manager= LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
-class User(db.Model): # table in database
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+class User(db.Model, UserMixin): # table in database
     id = db.Column(db.Integer, primary_key= True)
     username= db.Column(db.String(100), unique=True, nullable = False)
     email= db.Column(db.String(100),unique=True, nullable = False)
@@ -75,3 +80,4 @@ def success():
 if __name__ == "__main__":
 
     app.run(debug=True)
+
