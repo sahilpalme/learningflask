@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   
+    <title>Success</title>
+</head>
+<body style="color: red;" >
+
+    {% with messages = get_flashed_messages() %}
+        {%if messages %}
+            {% for msg in messages %}
+                <p>{{ msg }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <h2>You are successfully logged in </h2>
+    
+</body>
+</html>
