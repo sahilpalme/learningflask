@@ -1,34 +1,24 @@
 from flask import Flask, render_template,redirect, request,url_for,flash,session
-from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from form import RegistrationForm, LoginForm
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
-
-
+from flask_login import LoginManager, UserMixin, current_user, login_user, logout_user, login_required
+from model import User
+from extensions import db, login_manager
 app= Flask(__name__)
 
 app.secret_key= "my-secret-key"
-
-
-
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///users.db"  # database path
-db = SQLAlchemy(app) # object that will connect sql with flask
-login_manager= LoginManager()
+
+db.init_app(app)
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
 
 
-class User(UserMixin ,db.Model ): # table in database
-    id = db.Column(db.Integer, primary_key= True)
-    username= db.Column(db.String(100), unique=True, nullable = False)
-    email= db.Column(db.String(100),unique=True, nullable = False)
-    password = db.Column(db.String(100), nullable = False)
-    role = db.Column(db.String(100), nullable = False )
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 with app.app_context():
         db.create_all()
@@ -90,7 +80,7 @@ def login():
 def home():
     if current_user.role== "doctor":
         return render_template("success.html") # current_user.username shows the username of the user in session
-    if current_user.role=="patient":
+    elif current_user.role=="patient":
         return render_template("home.html")
     
 
