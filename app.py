@@ -24,6 +24,7 @@ class User(UserMixin ,db.Model ): # table in database
     username= db.Column(db.String(100), unique=True, nullable = False)
     email= db.Column(db.String(100),unique=True, nullable = False)
     password = db.Column(db.String(100), nullable = False)
+    role = db.Column(db.String(100), nullable = False )
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -36,22 +37,31 @@ with app.app_context():
 def Register():
     form = RegistrationForm()
     if form.validate_on_submit():
+        print("form validated")
         username = form.username.data
         password = generate_password_hash(form.password.data)
         email = form.email.data
+        role = "patient"
 
 
-        user = User(   # object of User
+        user = User(  # object of User
                     username=username,
                     email=email,
-                    password=password
+                    password=password,
+                    role = role
                     )
-        db.session.add(user)  # add the given record in the database
-        db.session.commit() # commit the changes
-
-        return redirect(url_for("login"))
-    return render_template("Register.html", form= form)    
-    
+        existing_1 = User.query.filter_by(username=username).first() 
+        existing_2 = User.query.filter_by(email=email).first() 
+        if not existing_1: 
+            if not existing_2:
+                db.session.add(user) # add the given record in the database 
+                db.session.commit() # commit the changes 
+                return redirect(url_for("login")) 
+            else:
+                flash("Email already exists")
+        else: 
+            flash("Username already exists") 
+    return render_template("Register.html", form= form)
 @app.route("/login", methods= ["GET","POST"])
 def login():
     form = LoginForm()
@@ -60,20 +70,31 @@ def login():
         password = form.password.data
 
         user = User.query.filter_by(username= username).first()
+        admin = User.query.filter_by(username= username,role= "admin").first()
+        if admin:
+            if check_password_hash(user.password,password):
+                login_user(user)
+            return redirect(url_for("admin"))              
         if user:
             if check_password_hash(user.password,password):
                 login_user(user) # data check krke user ko session me daal deta hai
-                return redirect(url_for("success"))
+                return redirect(url_for("home"))
             else:
                 flash("Incorrect password") 
         else:
-            flash("User doesnot exist")             
+            flash("User doesnot exist")   
     return render_template("login.html", form = form)
 
-@app.route("/success")
+@app.route("/home")
 @login_required
-def success():
-    return render_template("success.html") # current_user.username shows the username of the user in session
+def home():
+    if current_user.role== "doctor":
+        return render_template("success.html") # current_user.username shows the username of the user in session
+    if current_user.role=="patient":
+        return render_template("home.html")
+    
+
+
 
 @app.route("/logout")
 @login_required
@@ -83,8 +104,12 @@ def logout():
     return redirect(url_for("login"))
 
 
+@app.route("/admin90")
+@login_required
+def admin():
+    return render_template("admin.html")
+
 
 if __name__ == "__main__":
 
     app.run(debug=True)
-

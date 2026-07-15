@@ -15,48 +15,49 @@
             {{ form.hidden_tag() }}
 
             
-         <p>
+        <p>
             {{form.username.label}}<br>
             {{form.username(size=30, placeholder= 'Enter your username')}}<br>
             {% for error in form.username.errors %}
             <span style="color: red;">{{ error }}</span>
             {% endfor %}
-         </p> 
-         
-          <p>
+        </p> 
+        
+        <p>
             {{form.password.label}}<br>
             {{form.password(size=30, placeholder= 'Enter password')}}<br>
             {% for error in form.password.errors %}
             <span style="color: red;">{{ error }}</span>
             {% endfor %}
-         </p> 
+        </p> 
 
-          <p>
+        <p>
             {{form.email.label}}<br>
             {{form.email(size=30 ,placeholder="e.g abc@gmail.com")}}<br>
             {% for error in form.email.errors %}
             <span style="color: red;">{{ error }}</span>
             {% endfor %}
-         </p> 
-         <br>
-         
-         <p>
+        </p> 
+        <br>
+        <p>
             {{ form.submit() }}
-         </p>
+        </p>
         
 
 
         </form>
 
-    </div>
+    
 
-    {% with messages = get_flashed_messages() %}
-        {%if messages %}
-            {% for msg in messages %}
-                <p>{{ msg }}</p>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
+{% with messages = get_flashed_messages() %}
+    {%if messages %}
+        {% for msg in messages %}
+            <p>{{ msg }}</p>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+    </div>
 
 </body>
 </html>
