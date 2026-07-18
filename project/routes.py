@@ -1,19 +1,17 @@
 from flask import render_template, redirect, url_for, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
-from models import User
+from models import User,Appointment
 from forms import RegistrationForm, LoginForm, AppointmentForm
 from extensions import db
 from flask import Blueprint
 
 bp = Blueprint("main", __name__)
 
-print("before register route")
 @bp.route("/",methods=["GET","POST"]) 
 def Register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        print("form validated")
         username = form.username.data
         password = generate_password_hash(form.password.data)
         email = form.email.data
@@ -51,7 +49,7 @@ def login():
         if admin:
             if check_password_hash(user.password,password):
                 login_user(user)
-            return redirect(url_for("main.admin"))              
+            return redirect(url_for("main.Admin"))              
         if user:
             if check_password_hash(user.password,password):
                 login_user(user) # data check krke user ko session me daal deta hai
@@ -80,13 +78,53 @@ def logout():
     return redirect(url_for("main.login"))
 
 
-@bp.route("/admin90")
+@bp.route("/admin90", methods= ["GET","POST"])
 @login_required
-def admin():
-    return render_template("admin.html")
+def Admin():
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        username = form.username.data
+        password = generate_password_hash(form.password.data)
+        email = form.email.data
+        role = "doctor"
+
+        user = User(  # object of User
+                    username=username,
+                    email=email,
+                    password=password,
+                    role = role
+                    )
+        existing_1 = User.query.filter_by(username=username).first() 
+        existing_2 = User.query.filter_by(email=email).first() 
+        if not existing_1: 
+            if not existing_2:
+                db.session.add(user) # add the given record in the database 
+                db.session.commit() # commit the changes 
+                return redirect(url_for("main.Admin")) 
+            else:
+                flash("Email already exists")
+        else: 
+            flash("Username already exists") 
+    return render_template("Register.html", form= form)
+
 
 @bp.route("/book_appointment", methods=["GET","POST"])
 @login_required
 def book_appointment():
     form = AppointmentForm()
+    doctors = User.query.filter_by(role = "doctor").all()
+    form.doctor.choices = [(doctor.id, doctor.username) for doctor in doctors]
+    if form.validate_on_submit():
+        appointment = Appointment(
+                            patient_id=current_user.id,
+                            doctor_id=form.doctor.data,
+                            appointment_date=form.appointment_date.data,
+                            appointment_time=form.appointment_time.data,
+                            reason=form.reason.data
+                            )
+
+        db.session.add(appointment)
+        db.session.commit()
+        flash("Appointment successful!")
+        return redirect(url_for("main.home"))
     return render_template("book_appointment.html", form=form)
