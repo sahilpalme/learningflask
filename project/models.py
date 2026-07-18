@@ -8,8 +8,8 @@ class User(UserMixin ,db.Model ): # table in database
     email= db.Column(db.String(100),unique=True, nullable = False)
     password = db.Column(db.String(100), nullable = False)
     role = db.Column(db.String(100), nullable = False )
-    patient_appointment = db.relationship('Appointment',foreign_key="Appointment.patient_id", back_populates="patient") # this took all the info from appointment whose patient id is patient_id
-    doctor_appointment = db.relationship('Appointment',foreign_key="Appointment.doctor_id", back_populates="doctor")
+    patient_appointment = db.relationship('Appointment',foreign_keys="Appointment.patient_id", back_populates="patient") # this took all the info from appointment whose patient id is patient_id
+    doctor_appointment = db.relationship('Appointment',foreign_keys="Appointment.doctor_id", back_populates="doctor")
 
 class Appointment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
