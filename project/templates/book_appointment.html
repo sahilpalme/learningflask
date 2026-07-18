@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Register</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+</head>
+<body>
+
+    <div class="login-container">
+        <h2>Register </h2>
+
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            
+        <p>
+            {{form.doctor.label}}<br>
+            {{form.doctor()}}<br>
+            {% for error in form.doctor.errors %}
+            <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </p> 
+        
+        <p>
+            {{form.appointment_date.label}}<br>
+            {{form.appointment_date()}}<br>
+            {% for error in form.appointment_date.errors %}
+            <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </p> 
+
+        <p>
+            {{form.appointment_time.label}}<br>
+            {{form.appointment_time()}}<br>
+            {% for error in form.appointment_time.errors %}
+            <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </p> 
+        <br>
+        <p>
+            {{form.reason.label}}<br>
+            {{form.reason()}}<br>
+            {% for error in form.reason.errors %}
+            <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </p> 
+        <br>
+        <p>
+            {{ form.submit() }}
+        </p>
+        
+
+
+        </form>
+
+    
+
+{% with messages = get_flashed_messages() %}
+    {%if messages %}
+        {% for msg in messages %}
+            <p>{{ msg }}</p>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+    </div>
+
+</body>
+</html>

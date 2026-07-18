@@ -2,9 +2,10 @@ from flask import render_template, redirect, url_for, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
 from models import User
-from forms import RegistrationForm, LoginForm
+from forms import RegistrationForm, LoginForm, AppointmentForm
 from extensions import db
 from flask import Blueprint
+
 bp = Blueprint("main", __name__)
 
 print("before register route")
@@ -30,7 +31,7 @@ def Register():
             if not existing_2:
                 db.session.add(user) # add the given record in the database 
                 db.session.commit() # commit the changes 
-                return redirect(url_for("login")) 
+                return redirect(url_for("main.login")) 
             else:
                 flash("Email already exists")
         else: 
@@ -50,11 +51,11 @@ def login():
         if admin:
             if check_password_hash(user.password,password):
                 login_user(user)
-            return redirect(url_for("admin"))              
+            return redirect(url_for("main.admin"))              
         if user:
             if check_password_hash(user.password,password):
                 login_user(user) # data check krke user ko session me daal deta hai
-                return redirect(url_for("home"))
+                return redirect(url_for("main.home"))
             else:
                 flash("Incorrect password") 
         else:
@@ -76,10 +77,16 @@ def home():
 def logout():
     logout_user()
     flash("You have been logged out.", "success")
-    return redirect(url_for("login"))
+    return redirect(url_for("main.login"))
 
 
 @bp.route("/admin90")
 @login_required
 def admin():
     return render_template("admin.html")
+
+@bp.route("/book_appointment", methods=["GET","POST"])
+@login_required
+def book_appointment():
+    form = AppointmentForm()
+    return render_template("book_appointment.html", form=form)
