@@ -128,3 +128,11 @@ def book_appointment():
         flash("Appointment successful!")
         return redirect(url_for("main.home"))
     return render_template("book_appointment.html", form=form)
+
+@bp.route("/my_appointments")
+@login_required
+def my_appointments():
+    appointment= current_user.patient_appointment
+    print(appointment)
+    print(len(appointment))
+    return render_template("appointment.html",appointments=appointment )
