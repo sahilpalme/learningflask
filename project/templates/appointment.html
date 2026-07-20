@@ -3,16 +3,29 @@
 {% block content %}
 {% for appointment in appointments %}
 <div class="appointment">
+{% if role== "patient" %}   
 <h3>Doctor: {{ appointment.doctor.username }}</h3>
+{% else %}
+<h3>Patient: {{ appointment.patient.username }}</h3>
+{% endif %}
 
 <p>Date: {{ appointment.appointment_date }}</p>
 
 <p>Time: {{ appointment.appointment_time }}</p>
 
 <p>Status: {{ appointment.status }}</p>
-</div>
 <a href="{{ url_for('main.cancel_appointment', appointment_id=appointment.id) }}">
     Cancel Appointment
 </a>
+{% if  current_user.role == "doctor" %}
+{% if appointment.status =="pending" %}
+<a href="{{url_for('main.update_status', appointment_id=appointment.id, status = 'approved')}}">Approve</a>
+<a href="{{url_for('main.update_status', appointment_id=appointment.id, status = 'cancelled')}}">Cancel</a>
+{% elif appointment.status =="approved" %}
+<a href="{{url_for('main.update_status', appointment_id=appointment.id, status = 'completed')}}">Completed</a>
+{% endif %}
+{% endif %}
+</div>
+
 {% endfor %}
 {% endblock %}

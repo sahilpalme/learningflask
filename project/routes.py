@@ -132,8 +132,14 @@ def book_appointment():
 @bp.route("/my_appointments")
 @login_required
 def my_appointments():
-    appointment= current_user.patient_appointment
-    return render_template("appointment.html",appointments=appointment )
+    if current_user.role=="patient":
+        appointment= current_user.patient_appointment
+    elif current_user.role=="doctor":
+        appointment= current_user.doctor_appointment
+    else:
+        flash("Unauthorized")
+        return redirect(url_for("main.home"))
+    return render_template("appointment.html",appointments=appointment, role=current_user.role )
 
 
 @bp.route("/cancel/<int:appointment_id>")
@@ -153,6 +159,33 @@ def cancel_appointment(appointment_id):
     flash("Appointment cancelled successfully.")
     return redirect(url_for("main.my_appointments"))
     
+@bp.route("/update_status/<int:appointment_id>/<status>")    
+@login_required
+def update_status(appointment_id, status):
 
+    if current_user.role != "doctor":
+        flash("Access denied")
+        return redirect(url_for("main.home"))
+
+    appointment = db.session.get(Appointment, appointment_id)
+
+    if appointment is None:
+        flash("appointment not found")
+        return redirect(url_for("main.my_appointments"))
+
+
+    if appointment.doctor_id != current_user.id:
+        flash("You are not assigned to this appointment.")
+        return redirect(url_for("main.home"))
     
+
+    allowed_status=["rejected","approved","completed"]
+    if status in allowed_status:
+        appointment.status = status
+        db.session.commit()
+        flash("Status updated")
     
+    else:
+        flash("Invalid status")
+
+    return redirect(url_for("main.my_appointments"))
