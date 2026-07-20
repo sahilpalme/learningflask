@@ -133,6 +133,26 @@ def book_appointment():
 @login_required
 def my_appointments():
     appointment= current_user.patient_appointment
-    print(appointment)
-    print(len(appointment))
     return render_template("appointment.html",appointments=appointment )
+
+
+@bp.route("/cancel/<int:appointment_id>")
+@login_required
+def cancel_appointment(appointment_id):
+    appointment= db.session.get(Appointment,appointment_id)
+    if appointment is None:
+        flash("appointment not found")
+        return redirect(url_for("main.my_appointments"))
+    
+    if appointment.patient_id != current_user.id and appointment.doctor_id != current_user.id :
+        flash("You cannot cancel this")
+        return redirect(url_for("main.my_appointments"))
+    
+    appointment.status= "cancelled"
+    db.session.commit()
+    flash("Appointment cancelled successfully.")
+    return redirect(url_for("main.my_appointments"))
+    
+
+    
+    

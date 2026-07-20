@@ -11,5 +11,8 @@
 
 <p>Status: {{ appointment.status }}</p>
 </div>
+<a href="{{ url_for('main.cancel_appointment', appointment_id=appointment.id) }}">
+    Cancel Appointment
+</a>
 {% endfor %}
 {% endblock %}
