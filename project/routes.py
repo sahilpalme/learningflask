@@ -34,7 +34,7 @@ def Register():
                 flash("Email already exists")
         else: 
             flash("Username already exists") 
-    return render_template("Register.html", form= form)
+    return render_template("Register.html", form= form,title = "Patientr Registration")
 
 
 @bp.route("/login", methods= ["GET","POST"])
@@ -49,7 +49,7 @@ def login():
         if admin:
             if check_password_hash(user.password,password):
                 login_user(user)
-            return redirect(url_for("main.Admin"))              
+            return redirect(url_for("main.admin_dashboard"))              
         if user:
             if check_password_hash(user.password,password):
                 login_user(user) # data check krke user ko session me daal deta hai
@@ -77,10 +77,42 @@ def logout():
     flash("You have been logged out.", "success")
     return redirect(url_for("main.login"))
 
-
-@bp.route("/admin90", methods= ["GET","POST"])
+@bp.route("/admin")
 @login_required
-def Admin():
+def admin_dashboard():
+
+    if current_user.role != "admin":
+        flash("You are not authorized to access this page.")
+        return redirect(url_for("main.home"))
+
+    total_doctors = User.query.filter_by(role="doctor").count()
+    total_patients = User.query.filter_by(role="patient").count()
+    total_appointments = Appointment.query.count()
+    pending_appointments = Appointment.query.filter_by(status="pending").count()
+
+    return render_template(
+        "admin_dashboard.html",
+        total_doctors=total_doctors,
+        total_patients=total_patients,
+        total_appointments=total_appointments,
+        pending_appointments=pending_appointments
+    )
+
+@bp.route("/admin/doctors")
+@login_required
+def manage_doctors():
+
+    if current_user.role != "admin":
+        flash("You are not authorized to access this page.")
+        return redirect(url_for("main.home"))
+    
+    doctors=User.query.filter_by(role = "doctor").all()
+    return render_template("manage_doctors.html", doctors=doctors)
+
+
+@bp.route("/admin/add_doctors", methods= ["GET","POST"])
+@login_required
+def add_doctors():
     form = RegistrationForm()
     if form.validate_on_submit():
         username = form.username.data
@@ -98,14 +130,44 @@ def Admin():
         existing_2 = User.query.filter_by(email=email).first() 
         if not existing_1: 
             if not existing_2:
+                flash("Registration successful")
                 db.session.add(user) # add the given record in the database 
                 db.session.commit() # commit the changes 
-                return redirect(url_for("main.Admin")) 
+                return redirect(url_for("main.add_doctors")) 
             else:
                 flash("Email already exists")
         else: 
             flash("Username already exists") 
-    return render_template("Register.html", form= form)
+    return render_template("Register.html", form= form, title = "Doctor Registration")
+
+
+@bp.route("/admin/delete_doctor/<int:doctor_id>")
+@login_required
+def delete_doctor(doctor_id):
+
+    if current_user.role != "admin":
+        flash("You are not authorized to access this page.")
+        return redirect(url_for("main.home"))
+
+    doctor = db.session.get(User, doctor_id)
+
+    if doctor is None:
+        flash("Doctor not found.")
+        return redirect(url_for("main.manage_doctors"))
+
+    if doctor.role != "doctor":
+        flash("Selected user is not a doctor.")
+        return redirect(url_for("main.manage_doctors"))
+
+    if doctor.doctor_appointment:
+        flash("Cannot delete a doctor who has appointments.")
+        return redirect(url_for("main.manage_doctors"))
+
+    db.session.delete(doctor)
+    db.session.commit()
+
+    flash("Doctor deleted successfully.")
+    return redirect(url_for("main.manage_doctors"))
 
 
 @bp.route("/book_appointment", methods=["GET","POST"])
