@@ -1,3 +1,92 @@
 {% extends "base.html" %}
-{% block title %} home{% endblock %}
-{% block content %} <h1> Home </h1>{% endblock %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+<div class="py-5">
+
+
+    <div class="text-center">
+
+        <h1 class="display-4">🏥 Hospital Management System</h1>
+
+        <p class="lead">
+            Book appointments with trusted doctors quickly and easily.
+        </p>
+
+        {% if current_user.is_authenticated %}
+
+            {% if current_user.role == "patient" %}
+                <a href="{{ url_for('main.book_appointment') }}"
+                   class="btn btn-primary btn-lg">
+                    Book Appointment
+                </a>
+            {% elif current_user.role == "admin" %}
+                <a href="{{ url_for('main.admin_dashboard') }}"
+                   class="btn btn-dark btn-lg">
+                    Go to Dashboard
+                </a>
+            {% elif current_user.role == "doctor" %}
+                <a href="{{ url_for('main.my_appointments') }}"
+                   class="btn btn-success btn-lg">
+                    View Schedule
+                </a>
+            {% endif %}
+
+        {% else %}
+
+            <a href="{{ url_for('main.login') }}"
+               class="btn btn-primary btn-lg">
+                Login
+            </a>
+
+        {% endif %}
+
+    </div>
+
+
+</div>
+
+
+<div class="row mt-5">
+
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <h3>👨‍⚕️</h3>
+                <h5 class="card-title">Qualified Doctors</h5>
+                <p class="card-text">
+                    Book appointments with experienced and trusted doctors.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <h3>📅</h3>
+                <h5 class="card-title">Easy Booking</h5>
+                <p class="card-text">
+                    Schedule appointments in just a few clicks.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <h3>🔒</h3>
+                <h5 class="card-title">Secure Access</h5>
+                <p class="card-text">
+                    Role-based authentication keeps your data protected.
+                </p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

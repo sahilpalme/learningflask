@@ -8,8 +8,8 @@ from flask import Blueprint
 
 bp = Blueprint("main", __name__)
 
-@bp.route("/",methods=["GET","POST"]) 
-def Register():
+@bp.route("/register",methods=["GET","POST"]) 
+def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         username = form.username.data
@@ -34,7 +34,7 @@ def Register():
                 flash("Email already exists")
         else: 
             flash("Username already exists") 
-    return render_template("Register.html", form= form,title = "Patientr Registration")
+    return render_template("Register.html", form= form,title = "Patient Registration")
 
 
 @bp.route("/login", methods= ["GET","POST"])
@@ -61,13 +61,9 @@ def login():
     return render_template("login.html", form = form)
 
 
-@bp.route("/home")
-@login_required
+@bp.route("/")
 def home():
-    if current_user.role== "doctor":
-        return render_template("success.html")
-    elif current_user.role=="patient":
-        return render_template("home.html")
+    return render_template("home.html")
 
 
 @bp.route("/logout")

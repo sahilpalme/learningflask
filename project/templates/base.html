@@ -10,43 +10,50 @@
 <body>
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
-    <a class="navbar-brand" href="#">HospitalMS</a>
+    <a class="navbar-brand" href="{{ url_for('main.home') }}">HospitalMS</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
       <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
-    {% if not current_user.is_authenticated %}
         <a class="nav-link active" aria-current="page" href="{{ url_for('main.home') }}">Home</a>
+    {% if not current_user.is_authenticated %}
         <a class="nav-link" href="{{ url_for('main.login') }}">Login</a>
-        <a class="nav-link" href="#">Register</a>
+        <a class="nav-link" href="{{ url_for('main.register') }}">Register</a>
 
 
 {% elif current_user.role == "patient" %}
-        <a class="nav-link active" aria-current="page" href="{{ url_for('main.home') }}">Home</a>
-        <a class="nav-link" href="#">Book Appointment</a>
-        <a class="nav-link" href="#">My Appointments</a>
-        <a class="nav-link" href="#">Logout</a>
+        <a class="nav-link" href="{{ url_for('main.book_appointment') }}">Book Appointment</a>
+        <a class="nav-link" href="{{ url_for('main.my_appointments') }}">My Appointments</a>
+        <a class="nav-link" href="{{ url_for('main.logout') }}">Logout</a>
 
   
 {% elif current_user.role == "doctor" %}
-<div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="nav-link active" aria-current="page" href="{{ url_for('main.home') }}">Home</a>
-        <a class="nav-link" href="#">My Schedule</a>
-        <a class="nav-link" href="#">Logout</a>
+
+        <a class="nav-link" href="{{ url_for('main.my_appointments') }}">My Schedule</a>
+        <a class="nav-link" href="{{ url_for('main.logout') }}">Logout</a>
 
 {% elif current_user.role == "admin" %}
-        <a class="nav-link active" aria-current="page" href="{{ url_for('main.home') }}">Home</a>
-        <a class="nav-link" href="#">Manage Doctors</a>
-        <a class="nav-link" href="#">Logout</a>
+        <a class="nav-link" href="{{ url_for('main.manage_doctors') }}">Manage Doctors</a>
+        <a class="nav-link" href="{{ url_for('main.logout') }}">Logout</a>
 
 {% endif %}
 
-</div>
-</div>
-</div>
-</nav>
+      </div>
+      </div>
+    </div>
+    </nav>
 {% block content %}{% endblock %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
 </body>
 </html>
