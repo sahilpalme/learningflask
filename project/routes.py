@@ -193,11 +193,14 @@ def my_appointments():
     if current_user.role=="patient":
         appointment= current_user.patient_appointment
     elif current_user.role=="doctor":
+        pending= Appointment.query.filter_by(doctor_id=current_user.id,status="pending").count()
+        approved= Appointment.query.filter_by(doctor_id=current_user.id,status="approved").count()
+        completed= Appointment.query.filter_by(doctor_id=current_user.id,status="completed").count()
         appointment= current_user.doctor_appointment
     else:
         flash("Unauthorized","danger")
         return redirect(url_for("main.home"))
-    return render_template("appointment.html",appointments=appointment, role=current_user.role )
+    return render_template("appointment.html",appointments=appointment, role=current_user.role, pending=pending,approved=approved,completed=completed )
 
 
 @bp.route("/cancel/<int:appointment_id>")
@@ -212,6 +215,10 @@ def cancel_appointment(appointment_id):
         flash("You cannot cancel this","danger")
         return redirect(url_for("main.my_appointments"))
     
+    if appointment.status != "pending" and current_user.role == "patient":
+        flash("Only pending appointments can be cancelled.", "warning")
+        return redirect(url_for("main.my_appointments"))
+
     appointment.status= "cancelled"
     db.session.commit()
     flash("Appointment cancelled successfully.","success")

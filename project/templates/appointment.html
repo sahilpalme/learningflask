@@ -1,31 +1,166 @@
 {% extends "base.html" %}
 {% block title %}my appointment{% endblock %}
 {% block content %}
-{% for appointment in appointments %}
-<div class="appointment">
-{% if role== "patient" %}   
-<h3>Doctor: {{ appointment.doctor.username }}</h3>
-{% else %}
-<h3>Patient: {{ appointment.patient.username }}</h3>
+{% if role== "doctor" %}
+<div class="row mb-4">
+
+    <div class="col-md-4">
+        <div class="card text-center border-warning shadow-sm">
+            <div class="card-body">
+                <h5>Pending</h5>
+                <h2>{{ pending }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card text-center border-success shadow-sm">
+            <div class="card-body">
+                <h5>Approved</h5>
+                <h2>{{ approved }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card text-center border-primary shadow-sm">
+            <div class="card-body">
+                <h5>Completed</h5>
+                <h2>{{ completed }}</h2>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endif %}
+<div class="container mt-5">
+
+    <h2 class="mb-4">
+        {% if role == "doctor" %}
+            My Schedule
+        {% else %}
+            My Appointments
+        {% endif %}
+    </h2>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    {% if role == "doctor" %}
+                        <th>Patient</th>
+                    {% else %}
+                        <th>Doctor</th>
+                    {% endif %}
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+            {% for appointment in appointments %}
+                <tr>
+
+                    {% if role == "doctor" %}
+                        <td>{{ appointment.patient.username }}</td>
+                    {% else %}
+                        <td>{{ appointment.doctor.username }}</td>
+                    {% endif %}
+
+                    <td>{{ appointment.appointment_date }}</td>
+                    <td>{{ appointment.appointment_time }}</td>
+                    <td>{{ appointment.reason }}</td>
+
+                    <td>
+                        {% if appointment.status == "pending" %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+
+                        {% elif appointment.status == "approved" %}
+                            <span class="badge bg-success">Approved</span>
+
+                        {% elif appointment.status == "completed" %}
+                            <span class="badge bg-primary">Completed</span>
+
+                        {% elif appointment.status == "cancelled" %}
+                            <span class="badge bg-danger">Cancelled</span>
+
+                        {% endif %}
+                    </td>
+                    <td>
+
+{% if role == "doctor" %}
+    
+    {% if appointment.status == "pending" %}
+
+        <a href="{{ url_for('main.update_status',
+            appointment_id=appointment.id,
+            status='approved') }}"
+            class="btn btn-success btn-sm">
+            Approve
+        </a>
+
+        <a href="{{ url_for('main.cancel_appointment',
+            appointment_id=appointment.id) }}"
+            class="btn btn-danger btn-sm">
+            Cancel
+        </a>
+
+    {% elif appointment.status == "approved" %}
+
+        <a href="{{ url_for('main.update_status',
+            appointment_id=appointment.id,
+            status='completed') }}"
+            class="btn btn-primary btn-sm">
+            Complete
+        </a>
+
+        <a href="{{ url_for('main.cancel_appointment',
+            appointment_id=appointment.id) }}"
+            class="btn btn-danger btn-sm">
+            Cancel
+        </a>
+
+    {% elif appointment.status == "completed" %}
+
+        <span class="text-success fw-bold">Completed ✓</span>
+
+    {% elif appointment.status == "cancelled" %}
+
+        <span class="text-danger fw-bold">Cancelled ✕</span>
+
+    {% endif %}
+
 {% endif %}
 
-<p>Date: {{ appointment.appointment_date }}</p>
+{% if role == "patient" %}
 
-<p>Time: {{ appointment.appointment_time }}</p>
+    {% if appointment.status == "pending" %}
+        <a href="{{ url_for('main.cancel_appointment',
+            appointment_id=appointment.id) }}"
+            class="btn btn-danger btn-sm">
+            Cancel
+        </a>
 
-<p>Status: {{ appointment.status }}</p>
-<a href="{{ url_for('main.cancel_appointment', appointment_id=appointment.id) }}">
-    Cancel Appointment
-</a>
-{% if  current_user.role == "doctor" %}
-{% if appointment.status =="pending" %}
-<a href="{{url_for('main.update_status', appointment_id=appointment.id, status = 'approved')}}">Approve</a>
-<a href="{{url_for('main.update_status', appointment_id=appointment.id, status = 'cancelled')}}">Cancel</a>
-{% elif appointment.status =="approved" %}
-<a href="{{url_for('main.update_status', appointment_id=appointment.id, status = 'completed')}}">Completed</a>
+    {% else %}
+        <span class="text-muted">No actions</span>
+
+    {% endif %}
+
 {% endif %}
-{% endif %}
+</td>
+
+                </tr>
+            {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+
 </div>
 
-{% endfor %}
+
 {% endblock %}
