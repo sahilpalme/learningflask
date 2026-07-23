@@ -1,63 +1,55 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Register</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %} Register {% endblock %}
+{% block  content %}<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
 
-    <div class="login-container">
-        <h2>{{ title }} </h2>
+            <div class="card shadow-lg border-0">
+
+    <div class="card-body">
+
+        <h2 class="text-center mb-4">Register</h2>
 
         <form method="POST">
-            {{ form.hidden_tag() }}
 
-            
-        <p>
-            {{form.username.label}}<br>
-            {{form.username(size=30, placeholder= 'Enter your username')}}<br>
-            {% for error in form.username.errors %}
+    {{ form.hidden_tag() }}
+    <div class="mb-3">
+    {{ form.username.label(class="form-label") }}
+    {{ form.username(class="form-control") }}
+    {% for error in form.username.errors %}
             <span style="color: red;">{{ error }}</span>
             {% endfor %}
-        </p> 
-        
-        <p>
-            {{form.password.label}}<br>
-            {{form.password(size=30, placeholder= 'Enter password')}}<br>
-            {% for error in form.password.errors %}
+        </div>
+
+    <div class="mb-3">
+    {{ form.password.label(class="form-label") }}
+    {{ form.password(class="form-control") }}
+    {% for error in form.password.errors %}
             <span style="color: red;">{{ error }}</span>
             {% endfor %}
-        </p> 
+        </div>
 
-        <p>
-            {{form.email.label}}<br>
-            {{form.email(size=30 ,placeholder="e.g abc@gmail.com")}}<br>
-            {% for error in form.email.errors %}
+    <div class="mb-3">
+    {{ form.email.label(class="form-label") }}
+    {{ form.email(class="form-control") }}
+    {% for error in form.email.errors %}
             <span style="color: red;">{{ error }}</span>
             {% endfor %}
-        </p> 
-        <br>
-        <p>
-            {{ form.submit() }}
-        </p>
-        
+        </div>
 
 
-        </form>
 
     
+    <div class="d-grid">    
+    {{ form.submit(class="btn btn-primary w-100") }}</div>
 
-{% with messages = get_flashed_messages() %}
-    {%if messages %}
-        {% for msg in messages %}
-            <p>{{ msg }}</p>
-        {% endfor %}
-    {% endif %}
-{% endwith %}
+</form>
+
+
 
     </div>
-
-</body>
-</html>
+</div>
+        </div>
+    </div>
+</div>
+{% endblock %}

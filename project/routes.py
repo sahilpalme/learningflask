@@ -31,9 +31,9 @@ def register():
                 db.session.commit() # commit the changes 
                 return redirect(url_for("main.login")) 
             else:
-                flash("Email already exists","warning")
+                flash("This email is already registered","warning")
         else: 
-            flash("Username already exists","warning") 
+            flash("Username is already taken","warning") 
     return render_template("Register.html", form= form,title = "Patient Registration")
 
 
