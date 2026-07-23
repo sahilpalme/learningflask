@@ -31,9 +31,9 @@ def register():
                 db.session.commit() # commit the changes 
                 return redirect(url_for("main.login")) 
             else:
-                flash("Email already exists")
+                flash("Email already exists","warning")
         else: 
-            flash("Username already exists") 
+            flash("Username already exists","warning") 
     return render_template("Register.html", form= form,title = "Patient Registration")
 
 
@@ -55,9 +55,9 @@ def login():
                 login_user(user) # data check krke user ko session me daal deta hai
                 return redirect(url_for("main.home"))
             else:
-                flash("Incorrect password") 
+                flash("Incorrect password","danger") 
         else:
-            flash("User doesnot exist")   
+            flash("User doesnot exist", "danger")   
     return render_template("login.html", form = form)
 
 
@@ -78,7 +78,7 @@ def logout():
 def admin_dashboard():
 
     if current_user.role != "admin":
-        flash("You are not authorized to access this page.")
+        flash("You are not authorized to access this page.","danger")
         return redirect(url_for("main.home"))
 
     total_doctors = User.query.filter_by(role="doctor").count()
@@ -99,7 +99,7 @@ def admin_dashboard():
 def manage_doctors():
 
     if current_user.role != "admin":
-        flash("You are not authorized to access this page.")
+        flash("You are not authorized to access this page.", "danger")
         return redirect(url_for("main.home"))
     
     doctors=User.query.filter_by(role = "doctor").all()
@@ -126,14 +126,14 @@ def add_doctors():
         existing_2 = User.query.filter_by(email=email).first() 
         if not existing_1: 
             if not existing_2:
-                flash("Registration successful")
+                flash("Registration successful","success")
                 db.session.add(user) # add the given record in the database 
                 db.session.commit() # commit the changes 
                 return redirect(url_for("main.add_doctors")) 
             else:
-                flash("Email already exists")
+                flash("Email already exists","warning")
         else: 
-            flash("Username already exists") 
+            flash("Username already exists","warning") 
     return render_template("Register.html", form= form, title = "Doctor Registration")
 
 
@@ -142,27 +142,27 @@ def add_doctors():
 def delete_doctor(doctor_id):
 
     if current_user.role != "admin":
-        flash("You are not authorized to access this page.")
+        flash("You are not authorized to access this page.","danger")
         return redirect(url_for("main.home"))
 
     doctor = db.session.get(User, doctor_id)
 
     if doctor is None:
-        flash("Doctor not found.")
+        flash("Doctor not found.","danger")
         return redirect(url_for("main.manage_doctors"))
 
     if doctor.role != "doctor":
-        flash("Selected user is not a doctor.")
+        flash("Selected user is not a doctor.","warning")
         return redirect(url_for("main.manage_doctors"))
 
     if doctor.doctor_appointment:
-        flash("Cannot delete a doctor who has appointments.")
+        flash("Cannot delete a doctor who has appointments.","warning")
         return redirect(url_for("main.manage_doctors"))
 
     db.session.delete(doctor)
     db.session.commit()
 
-    flash("Doctor deleted successfully.")
+    flash("Doctor deleted successfully.","success")
     return redirect(url_for("main.manage_doctors"))
 
 
@@ -183,7 +183,7 @@ def book_appointment():
 
         db.session.add(appointment)
         db.session.commit()
-        flash("Appointment successful!")
+        flash("Appointment successful!","success")
         return redirect(url_for("main.home"))
     return render_template("book_appointment.html", form=form)
 
@@ -195,7 +195,7 @@ def my_appointments():
     elif current_user.role=="doctor":
         appointment= current_user.doctor_appointment
     else:
-        flash("Unauthorized")
+        flash("Unauthorized","danger")
         return redirect(url_for("main.home"))
     return render_template("appointment.html",appointments=appointment, role=current_user.role )
 
@@ -205,16 +205,16 @@ def my_appointments():
 def cancel_appointment(appointment_id):
     appointment= db.session.get(Appointment,appointment_id)
     if appointment is None:
-        flash("appointment not found")
+        flash("appointment not found","danger")
         return redirect(url_for("main.my_appointments"))
     
     if appointment.patient_id != current_user.id and appointment.doctor_id != current_user.id :
-        flash("You cannot cancel this")
+        flash("You cannot cancel this","danger")
         return redirect(url_for("main.my_appointments"))
     
     appointment.status= "cancelled"
     db.session.commit()
-    flash("Appointment cancelled successfully.")
+    flash("Appointment cancelled successfully.","success")
     return redirect(url_for("main.my_appointments"))
     
 @bp.route("/update_status/<int:appointment_id>/<status>")    
@@ -222,18 +222,18 @@ def cancel_appointment(appointment_id):
 def update_status(appointment_id, status):
 
     if current_user.role != "doctor":
-        flash("Access denied")
+        flash("Access denied","danger")
         return redirect(url_for("main.home"))
 
     appointment = db.session.get(Appointment, appointment_id)
 
     if appointment is None:
-        flash("appointment not found")
+        flash("appointment not found","danger")
         return redirect(url_for("main.my_appointments"))
 
 
     if appointment.doctor_id != current_user.id:
-        flash("You are not assigned to this appointment.")
+        flash("You are not assigned to this appointment.","danger")
         return redirect(url_for("main.home"))
     
 
@@ -241,9 +241,9 @@ def update_status(appointment_id, status):
     if status in allowed_status:
         appointment.status = status
         db.session.commit()
-        flash("Status updated")
+        flash("Status updated","success")
     
     else:
-        flash("Invalid status")
+        flash("Invalid status","danger")
 
     return redirect(url_for("main.my_appointments"))
